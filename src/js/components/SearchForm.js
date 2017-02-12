@@ -1,7 +1,25 @@
 var React = require('react');
 var AppActions = require('../actions/AppActions');
+var AppStore = require('../stores/AppStores')
+
+function getAppState(){
+  return {
+  }
+}
 
 var SearchForm = React.createClass({
+
+  getInitialState:function(){
+    return getAppState();
+  },
+
+  componentDidMount:function(){
+    AppStore.addChangeListener(this._onChange);
+  },
+
+  componentWillUmount:function(){
+    AppStore.removeChangeListener(this._onChange);
+  },
 
   render: function(){
     return(
@@ -23,6 +41,10 @@ var SearchForm = React.createClass({
       title: this.refs.title.value
     }
     AppActions.searchMovies(movie);
+  },
+
+  _onChange:function(){
+    this.setState(getAppState());
   }
 
 })

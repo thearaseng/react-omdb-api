@@ -19764,13 +19764,21 @@ var AppDispatcher = require('../dispatcher/AppDispatcher');
 var AppConstants = require('../constants/AppConstants');
 
 var AppActions = {
+
   searchMovies:function(movie){
-    console.log(movie.title);
     AppDispatcher.handleViewAction({
       actionType: AppConstants.SEARCH_MOVIES,
       movie: movie
     })
+  },
+
+  receiveMovieResults:function(movies){
+    AppDispatcher.handleViewAction({
+      actionType: AppConstants.RECEIVE_MOVIE_RESULTS,
+      movies: movies
+    })
   }
+
 }
 
 module.exports = AppActions;
@@ -19798,8 +19806,26 @@ module.exports = App;
 },{"../actions/AppActions":164,"../stores/AppStores":170,"./SearchForm":166,"react":163}],166:[function(require,module,exports){
 var React = require('react');
 var AppActions = require('../actions/AppActions');
+var AppStore = require('../stores/AppStores')
+
+function getAppState(){
+  return {
+  }
+}
 
 var SearchForm = React.createClass({displayName: "SearchForm",
+
+  getInitialState:function(){
+    return getAppState();
+  },
+
+  componentDidMount:function(){
+    AppStore.addChangeListener(this._onChange);
+  },
+
+  componentWillUmount:function(){
+    AppStore.removeChangeListener(this._onChange);
+  },
 
   render: function(){
     return(
@@ -19821,15 +19847,20 @@ var SearchForm = React.createClass({displayName: "SearchForm",
       title: this.refs.title.value
     }
     AppActions.searchMovies(movie);
+  },
+
+  _onChange:function(){
+    this.setState(getAppState());
   }
 
 })
 
 module.exports = SearchForm;
 
-},{"../actions/AppActions":164,"react":163}],167:[function(require,module,exports){
+},{"../actions/AppActions":164,"../stores/AppStores":170,"react":163}],167:[function(require,module,exports){
 module.exports = {
-  SEARCH_MOVIES: 'SEARCH_MOVIES'
+  SEARCH_MOVIES: 'SEARCH_MOVIES',
+  RECEIVE_MOVIE_RESULTS: 'RECEIVE_MOVIE_RESULTS'
 }
 
 },{}],168:[function(require,module,exports){
@@ -19872,6 +19903,12 @@ var _movies = [];
 var _selected = '';
 
 var AppStore = assign({}, EventEmitter.prototype, {
+  setMovieResults:function(movies){
+    _movies = movies
+  },
+  getMovieResults:function(){
+    return _movies;
+  },
   emitChange:function(){
     this.emit(CHANGE_EVENT);
   },
@@ -19886,7 +19923,14 @@ var AppStore = assign({}, EventEmitter.prototype, {
 AppDispatcher.register(function(payload){
   var action = payload.action;
   switch(action.actionType){
-
+    case AppConstants.SEARCH_MOVIES:
+      AppAPI.searchMovies(action.movie);
+      AppStore.emit(CHANGE_EVENT);
+      break;
+    case AppConstants.RECEIVE_MOVIE_RESULTS:
+      AppStore.setMovieResults(action.movies);
+      AppStore.emit(CHANGE_EVENT);
+      break;
   }
   return true;
 })
@@ -19898,7 +19942,20 @@ var AppActions = require('../actions/AppActions');
 
 module.exports = {
   searchMovies:function(movie){
-
+    // console.log('searching ' + movie.title);
+    // $.ajax({
+    //   url: 'http://www.omdbapi.com/?s=' + movie.title,
+    //   dataType: 'json',
+    //   sucess:function(data){
+    //     AppActions.receiveMovieResults(data);
+    //     console.log('receiving result of ' + movie.title);
+    //   },
+    //   error:function(xhr, status, err){
+    //     console.log(err);
+    //   }
+    // })
+    var fake = {"Search":[{"Title":"Swimming to Cambodia","Year":"1987","imdbID":"tt0094089","Type":"movie","Poster":"https://images-na.ssl-images-amazon.com/images/M/MV5BMTMzMjU4MTEzMl5BMl5BanBnXkFtZTcwOTU1MzMyMQ@@._V1_SX300.jpg"},{"Title":"Year Zero: The Silent Death of Cambodia","Year":"1979","imdbID":"tt0275085","Type":"movie","Poster":"https://images-na.ssl-images-amazon.com/images/M/MV5BNzk5MTg3NTktNDkzNS00YWRlLWE4MGYtYTUwYjkzNzkyZDNlXkEyXkFqcGdeQXVyMDY4MzkyNw@@._V1_SX300.jpg"},{"Title":"Cambodia: The Virginity Trade","Year":"2009","imdbID":"tt1487876","Type":"movie","Poster":"N/A"},{"Title":"Angkor: Cambodia Express","Year":"1982","imdbID":"tt0088723","Type":"movie","Poster":"http://ia.media-imdb.com/images/M/MV5BMTU2ODIzMTI4OV5BMl5BanBnXkFtZTcwMzYyODA4MQ@@._V1_SX300.jpg"},{"Title":"Intrusion: Cambodia","Year":"1983","imdbID":"tt0082566","Type":"movie","Poster":"N/A"},{"Title":"We Can't Change the World. But, We Wanna Build a School in Cambodia.","Year":"2011","imdbID":"tt1742028","Type":"movie","Poster":"N/A"},{"Title":"Pavarotti & Friends for Cambodia and Tibet","Year":"2000","imdbID":"tt0301711","Type":"movie","Poster":"N/A"},{"Title":"Samsara: Death and Rebirth in Cambodia","Year":"1990","imdbID":"tt0123254","Type":"movie","Poster":"N/A"},{"Title":"Raise the Bamboo Curtain: Vietnam, Cambodia, and Burma","Year":"1996","imdbID":"tt0811034","Type":"movie","Poster":"N/A"},{"Title":"Cambodia: Living in the Killing Fields","Year":"1996","imdbID":"tt0155583","Type":"movie","Poster":"N/A"}],"totalResults":"49","Response":"True"}
+    AppActions.receiveMovieResults(fake);
   }
 }
 
