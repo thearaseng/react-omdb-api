@@ -19764,7 +19764,13 @@ var AppDispatcher = require('../dispatcher/AppDispatcher');
 var AppConstants = require('../constants/AppConstants');
 
 var AppActions = {
-
+  searchMovies:function(movie){
+    console.log(movie.title);
+    AppDispatcher.handleViewAction({
+      actionType: AppConstants.SEARCH_MOVIES,
+      movie: movie
+    })
+  }
 }
 
 module.exports = AppActions;
@@ -19791,6 +19797,7 @@ module.exports = App;
 
 },{"../actions/AppActions":164,"../stores/AppStores":170,"./SearchForm":166,"react":163}],166:[function(require,module,exports){
 var React = require('react');
+var AppActions = require('../actions/AppActions');
 
 var SearchForm = React.createClass({displayName: "SearchForm",
 
@@ -19798,21 +19805,29 @@ var SearchForm = React.createClass({displayName: "SearchForm",
     return(
       React.createElement("div", {className: "search-form"}, 
         React.createElement("h1", {className: "text-center"}, "Search for Movies"), 
-        React.createElement("form", null, 
+        React.createElement("form", {onSubmit: this.onSubmit}, 
           React.createElement("div", {className: "form-group"}, 
-            React.createElement("input", {type: "text", className: "form-control", ref: "searchText", placeholder: "Enter a Movie title..."})
+            React.createElement("input", {type: "text", className: "form-control", ref: "title", placeholder: "Enter a Movie title..."})
           ), 
           React.createElement("button", {className: "btn btn-primary btn-block"}, "Search")
         )
       )
       )
+  },
+
+  onSubmit:function(e){
+    e.preventDefault();
+    var movie = {
+      title: this.refs.title.value
+    }
+    AppActions.searchMovies(movie);
   }
 
 })
 
 module.exports = SearchForm;
 
-},{"react":163}],167:[function(require,module,exports){
+},{"../actions/AppActions":164,"react":163}],167:[function(require,module,exports){
 module.exports = {
   SEARCH_MOVIES: 'SEARCH_MOVIES'
 }
